@@ -1,0 +1,42 @@
+.users-page { padding: 12px; margin-left: 0; }
+.users-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+.users-actions { display:flex; align-items:center; gap:12px; }
+.filters { display:flex; gap:8px; align-items:center; }
+.filter-input { padding:8px 10px; border-radius:6px; border:1px solid #e6e9ee; }
+.filter-select { padding:8px 10px; border-radius:6px; border:1px solid #e6e9ee; }
+.users-body { display:flex; gap:8px; align-items:flex-start; }
+.list-column { flex:1; padding: 0; display:flex; flex-direction:column; }
+.side-column { width:250px; /* match sidebar width */ position:sticky; top:12px; align-self:flex-start; }
+.users-grid { display: grid; grid-template-columns: repeat(auto-fill, 300px); gap: 14px 16px; margin: 8px 0 40px; margin-left: 0; justify-content: start; }
+
+/* Make each card the same size and distribute content */
+.user-item { width: 300px; height: 180px; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; border-radius: 8px; gap: 8px; }
+.user-item .user-header { margin-bottom: 6px; }
+.user-email, .user-rol { margin: 0 0 6px 0; }
+
+/* Favor 4 columns on wide screens so the 4th card sits next to the 3rd */
+@media (min-width: 1280px) {
+	.users-grid { grid-template-columns: repeat(4, 300px); }
+}
+.user-header { display:flex; justify-content:space-between; align-items:center; }
+.form-panel { margin-bottom:12px; }
+.user-actions { display:flex; gap:8px; }
+.empty-state { color:#64748b; }
+
+/* Responsive: collapse sidebar under 800px */
+@media (max-width: 800px) {
+	.users-body { flex-direction:column; }
+	.side-column { width:100%; position:relative; top:0; }
+	.users-page { margin-left: 0; }
+	.users-grid { grid-template-columns: 1fr; }
+}
+
+/* Modal styles for the user form (shared look) */
+.modal-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:999; }
+.modal-window { background:#fff; width:760px; max-width:95%; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.12); padding:18px; z-index:1001; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.close-btn { background:transparent; border:0; font-size:18px; cursor:pointer; }
+.compact-form app-input { display:block; margin-bottom:12px; }
+.compact-form .form-group { margin-bottom:12px; }
+.compact-form .form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }

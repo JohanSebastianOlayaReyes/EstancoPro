@@ -1,0 +1,24 @@
+.roles-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:12px; margin-top:12px; }
+.role-card { padding:12px; border-radius:8px; background:#fff; box-shadow:0 6px 16px rgba(0,0,0,0.04); }
+.role-card .desc { margin:6px 0 0; font-size:0.9rem; color:var(--muted,#666); }
+.card-actions { margin-top:8px; display:flex; gap:8px; justify-content:flex-end; }
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:999; }
+.modal-window { background:#fff; width:640px; max-width:95%; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.12); padding:18px; z-index:1001; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+
+@media (max-width:640px) { .roles-grid { grid-template-columns: 1fr; } .modal-window { width:95%; } }
+
+/* Header controls */
+.header-with-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.header-controls .header-controls { display:flex; gap:12px; align-items:center; }
+.header-controls app-input { width:260px; }
+.filter-select { padding:8px 10px; border-radius:6px; border:1px solid var(--color-border); background:white; }
+
+@media (max-width:900px) {
+	.header-controls app-input { width:160px; }
+	.header-controls { gap:8px; }
+}

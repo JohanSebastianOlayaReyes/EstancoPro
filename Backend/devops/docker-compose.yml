@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # SQL Server 2022
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: security-model-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SqlServer2025!
+      - MSSQL_PID=Developer
+    ports:
+      - "1434:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - security-network
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P SqlServer2025! -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # API .NET
+  api:
+    build:
+      context: ..
+      dockerfile: devops/Dockerfile
+    container_name: security-model-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=SecurityModel;User Id=sa;Password=SqlServer2025!;TrustServerCertificate=True;MultipleActiveResultSets=true;
+    ports:
+      - "5000:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - security-network
+    restart: on-failure
+
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  security-network:
+    driver: bridge

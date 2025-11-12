@@ -1,0 +1,306 @@
+<app-sidebar-menu [sections]="menuSections"></app-sidebar-menu>
+
+<!-- Reserve left space for fixed sidebar -->
+<div class="admin-container">
+
+  <div class="container-xl">
+  <div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Gestión de Productos</h2>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <i class="ti ti-plus icon"></i>
+          Crear Producto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="d-flex">
+          <div>
+            <i class="ti ti-check icon alert-icon"></i>
+          </div>
+          <div>
+            {{ successMessage() }}
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Products Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Listado de Productos</h3>
+      </div>
+      <div class="card-body">
+        @if (isLoading() && products().length === 0) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+        } @else if (products().length === 0) {
+          <div class="empty">
+            <div class="empty-icon">
+              <i class="ti ti-package icon"></i>
+            </div>
+            <p class="empty-title">No hay productos</p>
+            <p class="empty-subtitle text-muted">
+              Comience creando su primer producto
+            </p>
+            <div class="empty-action">
+              <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+                <i class="ti ti-plus icon"></i>
+                Crear Producto
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table table-striped">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Unidad</th>
+                  <th>Costo</th>
+                  <th>Precio</th>
+                  <th>Stock</th>
+                  <th>Punto Reorden</th>
+                  <th>Estado</th>
+                  <th class="w-1">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (product of products(); track product.id) {
+                  <tr [attr.data-product-id]="product.id">
+                    <td class="text-muted">{{ product.name }}</td>
+                    <td class="text-muted">{{ getCategoryName(product.categoryId) }}</td>
+                    <td class="text-muted">{{ getUnitMeasureName(product.unitMeasureId) }}</td>
+                    <td class="text-muted">${{ product.unitCost.toFixed(2) }}</td>
+                    <td class="text-muted">${{ product.unitPrice.toFixed(2) }}</td>
+                    <td>
+                      @if (product.stockOnHand <= product.reorderPoint) {
+                        <span class="badge bg-danger">{{ product.stockOnHand }}</span>
+                      } @else {
+                        <span class="badge bg-success">{{ product.stockOnHand }}</span>
+                      }
+                    </td>
+                    <td class="text-muted">{{ product.reorderPoint }}</td>
+                    <td>
+                      @if (product.active) {
+                        <span class="badge bg-success">Activo</span>
+                      } @else {
+                        <span class="badge bg-danger">Inactivo</span>
+                      }
+                    </td>
+                    <td>
+                      <div class="btn-list flex-nowrap">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-icon btn-primary"
+                          (click)="openEditModal(product)"
+                          title="Editar">
+                          <i class="ti ti-edit icon"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-icon btn-danger"
+                          (click)="deleteProduct(product.id)"
+                          title="Eliminar">
+                          <i class="ti ti-trash icon"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+@if (isModalOpen()) {
+  <div class="modal modal-blur fade show" style="display: block;" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            @if (isEditMode()) {
+              <i class="ti ti-edit icon me-2"></i>Editar Producto
+            } @else {
+              <i class="ti ti-plus icon me-2"></i>Crear Producto
+            }
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          @if (errorMessage()) {
+            <div class="alert alert-danger" role="alert">
+              <div class="d-flex">
+                <div>
+                  <i class="ti ti-alert-circle icon alert-icon"></i>
+                </div>
+                <div>
+                  {{ errorMessage() }}
+                </div>
+              </div>
+            </div>
+          }
+
+          <form>
+            <div class="row mb-3">
+              <div class="col-12">
+                <label class="form-label required">Nombre del Producto</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="currentProduct().name"
+                  (input)="updateProductField('name', $any($event.target).value)"
+                  placeholder="Ingrese el nombre del producto">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label required">Categoría</label>
+                <select
+                  class="form-select"
+                  [value]="currentProduct().categoryId"
+                  (change)="updateProductField('categoryId', +$any($event.target).value)">
+                  <option value="0">Seleccione una categoría</option>
+                  @for (category of categories(); track category.id) {
+                    <option [value]="category.id">{{ category.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Unidad de Medida</label>
+                <select
+                  class="form-select"
+                  [value]="currentProduct().unitMeasureId"
+                  (change)="updateProductField('unitMeasureId', +$any($event.target).value)">
+                  <option value="0">Seleccione una unidad</option>
+                  @for (unit of unitMeasures(); track unit.id) {
+                    <option [value]="unit.id">{{ unit.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label class="form-label required">Costo Unitario</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [value]="currentProduct().unitCost"
+                  (input)="updateProductField('unitCost', +$any($event.target).value)"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label required">Precio Unitario</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [value]="currentProduct().unitPrice"
+                  (input)="updateProductField('unitPrice', +$any($event.target).value)"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00">
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Tasa de Impuesto (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [value]="currentProduct().taxRate || 0"
+                  (input)="updateProductField('taxRate', +$any($event.target).value)"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  placeholder="0.00">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label required">Stock Disponible</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [value]="currentProduct().stockOnHand"
+                  (input)="updateProductField('stockOnHand', +$any($event.target).value)"
+                  min="0"
+                  placeholder="0">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label required">Punto de Reorden</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [value]="currentProduct().reorderPoint"
+                  (input)="updateProductField('reorderPoint', +$any($event.target).value)"
+                  min="0"
+                  placeholder="0">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-12">
+                <label class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [checked]="currentProduct().active"
+                    (change)="updateProductField('active', $any($event.target).checked)">
+                  <span class="form-check-label">Producto Activo</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-link link-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary ms-auto"
+            (click)="saveProduct()"
+            [disabled]="isLoading()">
+            @if (isLoading()) {
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            }
+            @if (isEditMode()) {
+              <i class="ti ti-device-floppy icon me-2"></i>Actualizar
+            } @else {
+              <i class="ti ti-plus icon me-2"></i>Crear
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop fade show"></div>
+} 
+
+  </div> <!-- /.admin-container -->

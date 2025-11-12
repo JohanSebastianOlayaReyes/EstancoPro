@@ -1,0 +1,18 @@
+.roles-list { margin-top: 12px; }
+.roles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.role-item { display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:8px; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.04); }
+.role-main .desc { margin:4px 0 0; font-size:0.9rem; color:var(--muted,#666); }
+.role-actions app-button { margin-left:8px; }
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1000; }
+.modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:999; }
+.modal-window { background:#fff; width:760px; max-width:95%; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.12); padding:18px; z-index:1001; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.form-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.form-actions { margin-top:12px; display:flex; gap:8px; justify-content:flex-end; }
+
+@media (max-width: 640px) {
+  .roles-grid { grid-template-columns: 1fr; }
+  .modal-window { width: 95%; }
+}
