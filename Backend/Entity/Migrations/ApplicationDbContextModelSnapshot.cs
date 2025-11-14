@@ -121,6 +121,62 @@ namespace Entity.Migrations
                     b.ToTable("categories");
                 });
 
+            modelBuilder.Entity("Entity.Model.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeleteAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("LoyaltyPoints")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Customer");
+                });
+
             modelBuilder.Entity("Entity.Model.Form", b =>
                 {
                     b.Property<int>("Id")
@@ -219,6 +275,45 @@ namespace Entity.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("modules");
+                });
+
+            modelBuilder.Entity("Entity.Model.PaymentMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeleteAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RequiresReference")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentMethod");
                 });
 
             modelBuilder.Entity("Entity.Model.Permission", b =>
@@ -593,6 +688,9 @@ namespace Entity.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("DeleteAt")
                         .HasColumnType("datetime2");
 
@@ -619,7 +717,54 @@ namespace Entity.Migrations
 
                     b.HasIndex("CashSessionId");
 
+                    b.HasIndex("CustomerId");
+
                     b.ToTable("sales");
+                });
+
+            modelBuilder.Entity("Entity.Model.SalePayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeleteAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.HasIndex("SaleId");
+
+                    b.ToTable("SalePayment");
                 });
 
             modelBuilder.Entity("Entity.Model.SaleProductDetail", b =>
@@ -951,7 +1096,32 @@ namespace Entity.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Entity.Model.Customer", "customer")
+                        .WithMany("sales")
+                        .HasForeignKey("CustomerId");
+
                     b.Navigation("cashSession");
+
+                    b.Navigation("customer");
+                });
+
+            modelBuilder.Entity("Entity.Model.SalePayment", b =>
+                {
+                    b.HasOne("Entity.Model.PaymentMethod", "paymentMethod")
+                        .WithMany("salePayments")
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entity.Model.Sale", "sale")
+                        .WithMany("salePayments")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("paymentMethod");
+
+                    b.Navigation("sale");
                 });
 
             modelBuilder.Entity("Entity.Model.SaleProductDetail", b =>
@@ -1031,6 +1201,11 @@ namespace Entity.Migrations
                     b.Navigation("products");
                 });
 
+            modelBuilder.Entity("Entity.Model.Customer", b =>
+                {
+                    b.Navigation("sales");
+                });
+
             modelBuilder.Entity("Entity.Model.Form", b =>
                 {
                     b.Navigation("formModules");
@@ -1041,6 +1216,11 @@ namespace Entity.Migrations
             modelBuilder.Entity("Entity.Model.Module", b =>
                 {
                     b.Navigation("formModules");
+                });
+
+            modelBuilder.Entity("Entity.Model.PaymentMethod", b =>
+                {
+                    b.Navigation("salePayments");
                 });
 
             modelBuilder.Entity("Entity.Model.Permission", b =>
@@ -1068,6 +1248,8 @@ namespace Entity.Migrations
 
             modelBuilder.Entity("Entity.Model.Sale", b =>
                 {
+                    b.Navigation("salePayments");
+
                     b.Navigation("saleproductdetail");
                 });
 

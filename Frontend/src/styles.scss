@@ -1,0 +1,158 @@
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Variables CSS Globales - Paleta Verde Estanco */
+:root {
+  /* Primarios */
+  --primary-dark: #1B3A1B;
+  --primary: #2D5A2D;
+  --primary-light: #3D7A3D;
+  --primary-lighter: #4A9A4A;
+
+  /* Acentos */
+  --accent-lime: #7CB342;
+  --accent-sage: #8BC34A;
+  --accent-mint: #A5D6A7;
+  --border-green: #C8E6C9;
+
+  /* Fondos */
+  --bg-green: #F1F8F4;
+  --bg-green-light: #F8FBF9;
+
+  /* Estados */
+  --success: #43A047;
+  --warning: #FBC02D;
+  --error: #E53935;
+  --info: #039BE5;
+
+  /* Financieros */
+  --cash-green: #4CAF50;
+  --expense-red: #EF5350;
+  --profit-gold: #FFB300;
+}
+
+/* Reset Global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-green);
+  color: #424242;
+  line-height: 1.6;
+}
+
+/* Utility Classes - Botones */
+.btn-primary {
+  @apply bg-lime text-white font-medium py-2 px-5 rounded-md transition-all duration-300 shadow-lime;
+
+  &:hover:not(:disabled) {
+    @apply bg-lime-light -translate-y-0.5;
+  }
+
+  &:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}
+
+.btn-secondary {
+  @apply bg-white text-estanco-light border-2 border-border-green font-medium py-2 px-5 rounded-md transition-all duration-300;
+
+  &:hover {
+    @apply bg-bg-green border-lime text-estanco;
+  }
+}
+
+.btn-danger {
+  @apply bg-error text-white font-medium py-2 px-5 rounded-md transition-all duration-300;
+
+  &:hover {
+    @apply bg-red-700;
+  }
+}
+
+/* Cards */
+.card {
+  @apply bg-white border border-border-green rounded-lg p-5 shadow-green-sm transition-all duration-300;
+
+  &:hover {
+    @apply shadow-green-md -translate-y-0.5;
+  }
+}
+
+/* Inputs */
+.input {
+  @apply w-full px-3.5 py-2.5 border-2 border-border-green rounded-md bg-white text-gray-700 transition-all duration-300;
+
+  &:focus {
+    @apply outline-none border-lime ring-4 ring-lime/10;
+  }
+}
+
+.label {
+  @apply block mb-1.5 text-estanco font-medium text-sm;
+}
+
+/* Stat Cards */
+.stat-card-sales {
+  @apply bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+.stat-card-profit {
+  @apply bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+.stat-card-stock {
+  @apply bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+.stat-card-expenses {
+  @apply bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+/* Alerts */
+.alert-success {
+  @apply bg-success/10 border-l-4 border-success text-green-800 px-4 py-3 rounded-r;
+}
+
+.alert-warning {
+  @apply bg-warning/10 border-l-4 border-warning text-yellow-800 px-4 py-3 rounded-r;
+}
+
+.alert-error {
+  @apply bg-error/10 border-l-4 border-error text-red-800 px-4 py-3 rounded-r;
+}
+
+.alert-info {
+  @apply bg-info/10 border-l-4 border-info text-blue-800 px-4 py-3 rounded-r;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+  @apply fixed inset-0 bg-black/50 z-40 flex items-center justify-center;
+}
+
+/* Modal Container */
+.modal {
+  @apply bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 z-50;
+}
+
+.modal-header {
+  @apply px-6 py-4 border-b border-gray-200 flex items-center justify-between;
+}
+
+.modal-body {
+  @apply px-6 py-4;
+}
+
+.modal-footer {
+  @apply px-6 py-4 border-t border-gray-200 flex justify-end gap-3;
+}

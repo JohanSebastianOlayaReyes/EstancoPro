@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(ANALISIS_BACKEND.txt)",
+      "Bash(cat:*)",
+      "Bash(\"C:\\Users\\jsola\\Desktop\\ADSO\\EstancoPro\\Frontend\\src\\app\\core\\interceptors\\auth.interceptor.ts\")",
+      "Bash(npx @angular/cli@latest new:*)",
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git rm:*)",
+      "Bash(if [ -d \"Frontend\" ])",
+      "Bash(then echo \"Frontend exists\")",
+      "Bash(else echo \"Frontend does not exist\")",
+      "Bash(fi)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init)",
+      "Bash(npm uninstall:*)",
+      "Bash(tree:*)",
+      "Bash(npm start)",
+      "Bash(taskkill:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(timeout:*)",
+      "Bash(nul)",
+      "Bash(curl:*)",
+      "Bash(dotnet build:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(ren:*)",
+      "Bash(ren ExpenseController.cs ExpenseController.cs.bak)",
+      "Bash(ren ProductAlertController.cs ProductAlertController.cs.bak)",
+      "Bash(dotnet run)",
+      "Bash(dotnet ef migrations:*)",
+      "Bash(netstat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

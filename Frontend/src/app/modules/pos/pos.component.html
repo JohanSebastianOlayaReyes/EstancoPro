@@ -1,0 +1,237 @@
+<div class="h-screen bg-bg-green flex flex-col overflow-hidden">
+  <!-- Header -->
+  <div class="bg-white border-b border-border-green px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <button (click)="goBack()" class="text-gray-600 hover:text-estanco transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+      </button>
+      <h1 class="text-2xl font-bold text-estanco-dark">Punto de Venta</h1>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div class="text-sm text-gray-600">
+        <span class="font-medium">Cajero:</span> {{ currentUser?.email }}
+      </div>
+      <div *ngIf="currentSession" class="bg-success/10 text-success px-4 py-2 rounded-md text-sm font-medium">
+        Caja Abierta: ${{ currentSession.openingAmount | number:'1.0-0' }}
+      </div>
+      <div *ngIf="!currentSession" class="bg-error/10 text-error px-4 py-2 rounded-md text-sm font-medium">
+        Sin Caja Abierta
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Left Side - Product Search & List -->
+    <div class="flex-1 flex flex-col bg-white border-r border-border-green">
+      <!-- Search Bar -->
+      <div class="p-4 border-b border-border-green">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="filterProducts()"
+            placeholder="Buscar producto por nombre, código o categoría..."
+            class="w-full pl-10 pr-4 py-3 border-2 border-border-green rounded-lg focus:border-lime focus:ring-4 focus:ring-lime/10 transition-all"
+          />
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <div *ngIf="loadingProducts" class="flex justify-center items-center h-full">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-estanco"></div>
+        </div>
+
+        <div *ngIf="!loadingProducts && filteredProducts.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400">
+          <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+          </svg>
+          <p class="text-lg font-medium">No se encontraron productos</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div
+            *ngFor="let product of filteredProducts"
+            (click)="addProductToSale(product)"
+            class="bg-white border-2 border-border-green rounded-lg p-4 hover:border-lime hover:shadow-green-md transition-all cursor-pointer"
+            [class.opacity-50]="product.stockQuantity <= 0"
+            [class.cursor-not-allowed]="product.stockQuantity <= 0"
+          >
+            <div class="text-3xl mb-2 text-center">
+              <svg class="w-12 h-12 mx-auto text-estanco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold text-sm text-estanco-dark mb-1 truncate">{{ product.name }}</h3>
+            <p class="text-xs text-gray-500 mb-2">{{ product.categoryName }}</p>
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-bold text-lime">${{ product.salePrice | number:'1.0-0' }}</span>
+              <span class="text-xs px-2 py-1 rounded" [ngClass]="product.stockQuantity > 10 ? 'bg-success/10 text-success' : product.stockQuantity > 0 ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'">
+                Stock: {{ product.stockQuantity }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Sale Cart -->
+    <div class="w-96 flex flex-col bg-bg-green">
+      <!-- Cart Header -->
+      <div class="bg-estanco text-white px-6 py-4">
+        <h2 class="text-xl font-bold">Carrito de Venta</h2>
+        <p class="text-sm text-mint">{{ saleItems.length }} productos</p>
+      </div>
+
+      <!-- Cart Items -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        <div *ngIf="saleItems.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400">
+          <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <p class="text-sm">El carrito está vacío</p>
+        </div>
+
+        <div *ngFor="let item of saleItems" class="bg-white border border-border-green rounded-lg p-3">
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex-1">
+              <h4 class="font-semibold text-sm text-estanco-dark">{{ item.productName }}</h4>
+              <p class="text-xs text-gray-500">${{ item.unitPrice | number:'1.0-0' }} c/u</p>
+            </div>
+            <button (click)="removeFromSale(item)" class="text-error hover:bg-error/10 p-1 rounded transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <button (click)="decreaseQuantity(item)" class="bg-gray-200 hover:bg-gray-300 w-8 h-8 rounded flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+              </button>
+              <span class="w-12 text-center font-semibold">{{ item.quantity }}</span>
+              <button (click)="increaseQuantity(item)" class="bg-lime hover:bg-lime-light text-white w-8 h-8 rounded flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+              </button>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-lg text-estanco">${{ item.subtotal | number:'1.0-0' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Footer - Totals -->
+      <div class="bg-white border-t-2 border-border-green p-6 space-y-3">
+        <div class="flex justify-between text-gray-600">
+          <span>Subtotal:</span>
+          <span class="font-semibold">${{ calculateSubtotal() | number:'1.0-0' }}</span>
+        </div>
+        <div class="flex justify-between text-gray-600">
+          <span>IVA ({{ taxRate }}%):</span>
+          <span class="font-semibold">${{ calculateTax() | number:'1.0-0' }}</span>
+        </div>
+        <div class="border-t-2 border-border-green pt-3 flex justify-between text-2xl font-bold">
+          <span class="text-estanco-dark">Total:</span>
+          <span class="text-lime">${{ calculateTotal() | number:'1.0-0' }}</span>
+        </div>
+
+        <div class="flex gap-2 pt-4">
+          <button
+            (click)="clearSale()"
+            [disabled]="saleItems.length === 0"
+            class="flex-1 btn-secondary"
+          >
+            Limpiar
+          </button>
+          <button
+            (click)="openPaymentModal()"
+            [disabled]="saleItems.length === 0 || !currentSession"
+            class="flex-1 btn-primary"
+          >
+            Cobrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<app-modal
+  [isOpen]="showPaymentModal"
+  [title]="'Procesar Pago'"
+  [type]="'info'"
+  [confirmText]="'Completar Venta'"
+  [showCancelButton]="true"
+  [cancelText]="'Cancelar'"
+  (confirmed)="completeSale()"
+  (closed)="showPaymentModal = false"
+>
+  <div class="space-y-4">
+    <div class="bg-lime/10 border border-lime rounded-lg p-4">
+      <p class="text-sm text-gray-600">Total a pagar:</p>
+      <p class="text-3xl font-bold text-lime">${{ calculateTotal() | number:'1.0-0' }}</p>
+    </div>
+
+    <div>
+      <label class="label">Método de Pago</label>
+      <select [(ngModel)]="selectedPaymentMethod" class="input">
+        <option [value]="null">Seleccionar método</option>
+        <option *ngFor="let method of paymentMethods" [value]="method.id">
+          {{ method.methodName }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label class="label">Cliente (Opcional)</label>
+      <select [(ngModel)]="selectedCustomerId" class="input">
+        <option [value]="null">Cliente general</option>
+        <option *ngFor="let customer of customers" [value]="customer.id">
+          {{ customer.firstName }} {{ customer.lastName }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label class="label">Observaciones (Opcional)</label>
+      <textarea
+        [(ngModel)]="saleObservations"
+        rows="2"
+        class="input"
+        placeholder="Notas adicionales sobre la venta..."
+      ></textarea>
+    </div>
+  </div>
+</app-modal>
+
+<!-- Success Modal -->
+<app-modal
+  [isOpen]="showSuccessModal"
+  [title]="'¡Venta Exitosa!'"
+  [type]="'success'"
+  [confirmText]="'Aceptar'"
+  (closed)="closeSuccessModal()"
+>
+  <div class="text-center py-4">
+    <div class="w-16 h-16 bg-success/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+      <svg class="w-10 h-10 text-success" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <p class="text-lg font-semibold text-gray-800 mb-2">La venta se ha procesado correctamente</p>
+    <p class="text-3xl font-bold text-lime">${{ lastSaleTotal | number:'1.0-0' }}</p>
+  </div>
+</app-modal>

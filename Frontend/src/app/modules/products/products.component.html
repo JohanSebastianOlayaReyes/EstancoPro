@@ -1,0 +1,392 @@
+<div class="min-h-screen bg-bg-green p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack()" class="text-gray-600 hover:text-estanco transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-3xl font-bold text-estanco-dark">Gestión de Productos</h1>
+          <p class="text-gray-600 mt-1">Administra el inventario de productos</p>
+        </div>
+      </div>
+
+      <button (click)="openAddProductModal()" class="btn-primary flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nuevo Producto
+      </button>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-2">
+          <label class="label">Buscar</label>
+          <div class="relative">
+            <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input
+              type="text"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="filterProducts()"
+              class="input pl-10"
+              placeholder="Buscar por nombre o código..."
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Categoría</label>
+          <select [(ngModel)]="selectedCategoryId" (ngModelChange)="filterProducts()" class="input">
+            <option [value]="null">Todas</option>
+            <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Estado</label>
+          <select [(ngModel)]="selectedStatus" (ngModelChange)="filterProducts()" class="input">
+            <option value="all">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+            <option value="low-stock">Stock Bajo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-estanco"></div>
+    </div>
+
+    <!-- Products Grid -->
+    <div *ngIf="!loading && filteredProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let product of filteredProducts" class="card hover:shadow-green-md transition-all">
+        <!-- Product Image -->
+        <div class="relative h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
+          <img
+            *ngIf="product.photo"
+            [src]="product.photo"
+            [alt]="product.name"
+            class="w-full h-full object-cover"
+          />
+          <div *ngIf="!product.photo" class="w-full h-full flex items-center justify-center">
+            <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+          </div>
+
+          <!-- Stock Badge -->
+          <div class="absolute top-2 right-2">
+            <span class="px-2 py-1 rounded-full text-xs font-semibold" [ngClass]="{
+              'bg-success/90 text-white': product.stockQuantity > product.minStock,
+              'bg-warning/90 text-white': product.stockQuantity <= product.minStock && product.stockQuantity > 0,
+              'bg-error/90 text-white': product.stockQuantity === 0
+            }">
+              Stock: {{ product.stockQuantity }}
+            </span>
+          </div>
+
+          <!-- Status Badge -->
+          <div class="absolute top-2 left-2">
+            <span class="px-2 py-1 rounded-full text-xs font-semibold" [ngClass]="{
+              'bg-lime/90 text-estanco-dark': product.state,
+              'bg-gray-400/90 text-white': !product.state
+            }">
+              {{ product.state ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="space-y-2">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <h3 class="font-bold text-lg text-estanco-dark">{{ product.name }}</h3>
+              <p class="text-sm text-gray-500">{{ product.code }}</p>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 line-clamp-2">{{ product.description }}</p>
+
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+            </svg>
+            <span>{{ product.categoryName || 'Sin categoría' }}</span>
+          </div>
+
+          <div class="pt-3 border-t border-gray-200">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm text-gray-600">Precio Compra:</span>
+              <span class="font-semibold text-gray-700">${{ product.purchasePrice | number:'1.0-0' }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Precio Venta:</span>
+              <span class="font-bold text-lime text-lg">${{ product.salePrice | number:'1.0-0' }}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2 pt-3">
+            <button
+              (click)="editProduct(product)"
+              class="flex-1 btn-secondary text-sm py-2"
+            >
+              Editar
+            </button>
+            <button
+              (click)="confirmDelete(product)"
+              class="flex-1 btn-danger text-sm py-2"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredProducts.length === 0" class="card text-center py-12">
+      <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+      </svg>
+      <p class="text-lg font-medium text-gray-600">No se encontraron productos</p>
+      <p class="text-sm text-gray-500 mt-2">{{ searchTerm ? 'Intenta con otros términos de búsqueda' : 'Agrega tu primer producto para comenzar' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<app-modal
+  [isOpen]="showProductModal"
+  [title]="editingProduct ? 'Editar Producto' : 'Nuevo Producto'"
+  [type]="'info'"
+  [confirmText]="processingAction ? 'Guardando...' : 'Guardar'"
+  [showCancelButton]="true"
+  [cancelText]="'Cancelar'"
+  (confirmed)="saveProduct()"
+  (closed)="closeProductModal()"
+>
+  <div class="space-y-4 max-h-[70vh] overflow-y-auto">
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="label">Código *</label>
+        <input
+          type="text"
+          [(ngModel)]="productForm.code"
+          [disabled]="processingAction"
+          class="input"
+          placeholder="Ej: PROD001"
+        />
+      </div>
+
+      <div>
+        <label class="label">Nombre *</label>
+        <input
+          type="text"
+          [(ngModel)]="productForm.name"
+          [disabled]="processingAction"
+          class="input"
+          placeholder="Nombre del producto"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label class="label">Descripción</label>
+      <textarea
+        [(ngModel)]="productForm.description"
+        [disabled]="processingAction"
+        rows="3"
+        class="input"
+        placeholder="Descripción del producto..."
+      ></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="label">Categoría *</label>
+        <select [(ngModel)]="productForm.categoryId" [disabled]="processingAction" class="input">
+          <option [value]="null">Seleccionar...</option>
+          <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="label">Unidad de Medida *</label>
+        <select [(ngModel)]="productForm.unitMeasureId" [disabled]="processingAction" class="input">
+          <option [value]="null">Seleccionar...</option>
+          <option *ngFor="let unit of unitMeasures" [value]="unit.id">{{ unit.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="label">Precio Compra *</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+          <input
+            type="number"
+            [(ngModel)]="productForm.purchasePrice"
+            [disabled]="processingAction"
+            min="0"
+            step="100"
+            class="input pl-8"
+            placeholder="0"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="label">Precio Venta *</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+          <input
+            type="number"
+            [(ngModel)]="productForm.salePrice"
+            [disabled]="processingAction"
+            min="0"
+            step="100"
+            class="input pl-8"
+            placeholder="0"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+      <div>
+        <label class="label">Stock *</label>
+        <input
+          type="number"
+          [(ngModel)]="productForm.stockQuantity"
+          [disabled]="processingAction"
+          min="0"
+          class="input"
+          placeholder="0"
+        />
+      </div>
+
+      <div>
+        <label class="label">Stock Mínimo *</label>
+        <input
+          type="number"
+          [(ngModel)]="productForm.minStock"
+          [disabled]="processingAction"
+          min="0"
+          class="input"
+          placeholder="0"
+        />
+      </div>
+
+      <div>
+        <label class="label">Stock Máximo *</label>
+        <input
+          type="number"
+          [(ngModel)]="productForm.maxStock"
+          [disabled]="processingAction"
+          min="0"
+          class="input"
+          placeholder="0"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label class="label">Fecha de Expiración</label>
+      <input
+        type="date"
+        [(ngModel)]="productForm.expirationDate"
+        [disabled]="processingAction"
+        class="input"
+      />
+    </div>
+
+    <div>
+      <label class="label">Imagen del Producto</label>
+      <div class="space-y-2">
+        <input
+          type="file"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          [disabled]="processingAction"
+          class="input"
+        />
+        <div *ngIf="productForm.photo" class="relative w-32 h-32 bg-gray-100 rounded-lg overflow-hidden">
+          <img [src]="productForm.photo" alt="Preview" class="w-full h-full object-cover"/>
+          <button
+            (click)="removePhoto()"
+            [disabled]="processingAction"
+            class="absolute top-1 right-1 bg-error text-white rounded-full p-1 hover:bg-red-700"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input
+        type="checkbox"
+        [(ngModel)]="productForm.state"
+        [disabled]="processingAction"
+        id="productState"
+        class="w-4 h-4 text-estanco border-gray-300 rounded focus:ring-estanco"
+      />
+      <label for="productState" class="text-sm text-gray-700">Producto activo</label>
+    </div>
+  </div>
+</app-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-modal
+  [isOpen]="showDeleteModal"
+  [title]="'Confirmar Eliminación'"
+  [type]="'warning'"
+  [confirmText]="processingAction ? 'Eliminando...' : 'Eliminar'"
+  [showCancelButton]="true"
+  [cancelText]="'Cancelar'"
+  (confirmed)="deleteProduct()"
+  (closed)="showDeleteModal = false"
+>
+  <div class="text-center py-4">
+    <svg class="w-16 h-16 mx-auto mb-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <p class="text-lg font-semibold text-gray-800 mb-2">¿Estás seguro de eliminar este producto?</p>
+    <p class="text-sm text-gray-600">Esta acción no se puede deshacer</p>
+    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+      <p class="font-medium">{{ productToDelete?.name }}</p>
+      <p class="text-sm text-gray-500">Código: {{ productToDelete?.code }}</p>
+    </div>
+  </div>
+</app-modal>
+
+<!-- Success Modal -->
+<app-modal
+  [isOpen]="showSuccessModal"
+  [title]="'Operación Exitosa'"
+  [type]="'success'"
+  [confirmText]="'Aceptar'"
+  (closed)="showSuccessModal = false; loadProducts()"
+>
+  <div class="text-center py-4">
+    <div class="w-16 h-16 bg-success/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+      <svg class="w-10 h-10 text-success" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+    </div>
+    <p class="text-lg font-semibold text-gray-800">{{ successMessage }}</p>
+  </div>
+</app-modal>

@@ -1,0 +1,63 @@
+using Business.Interfaces;
+using Entity.Dto;
+using Entity.Model;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Presentation.Controllers
+{
+    /// <summary>
+    /// Controlador para ProductAlert (Alertas de Stock)
+    /// </summary>
+    public class ProductAlertController : BaseController<ProductAlert, ProductAlertDto>
+    {
+        public ProductAlertController(IBaseBusiness<ProductAlert, ProductAlertDto> baseBusiness)
+            : base(baseBusiness)
+        {
+        }
+
+        /// <summary>
+        /// Obtiene alertas no leídas
+        /// GET: api/ProductAlert/unread
+        /// </summary>
+        [HttpGet("unread")]
+        public async Task<IActionResult> GetUnread()
+        {
+            try
+            {
+                var alerts = await _baseBusiness.GetAllAsync();
+                var unread = alerts.Where(a => !((ProductAlertDto)(object)a).IsRead);
+                return Ok(unread);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener alertas", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Marca una alerta como leída
+        /// POST: api/ProductAlert/{id}/mark-read
+        /// </summary>
+        [HttpPost("{id:int}/mark-read")]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            try
+            {
+                var alert = await _baseBusiness.GetByIdAsync(id);
+                if (alert == null)
+                    return NotFound(new { message = "Alerta no encontrada" });
+
+                var dto = (ProductAlertDto)(object)alert;
+                dto.IsRead = true;
+                dto.ReadAt = DateTime.UtcNow;
+
+                await _baseBusiness.UpdateAsync(id, dto);
+                return Ok(new { message = "Alerta marcada como leída" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al marcar alerta", error = ex.Message });
+            }
+        }
+    }
+}

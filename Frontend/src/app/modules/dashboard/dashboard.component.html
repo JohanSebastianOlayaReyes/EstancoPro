@@ -1,0 +1,150 @@
+<div class="p-6">
+  <!-- Título -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-estanco-dark">Dashboard</h1>
+    <p class="text-gray-600 mt-1">Bienvenido, {{ currentUser?.email }}</p>
+  </div>
+
+  <!-- Modales de sesión de caja -->
+  <app-modal
+    [isOpen]="showCashSessionModal"
+    [title]="'Sesión de Caja Abierta'"
+    [type]="'success'"
+    [confirmText]="'Entendido'"
+    (closed)="showCashSessionModal = false"
+  >
+    <p class="text-gray-700">
+      Tienes una sesión de caja abierta con un monto inicial de:
+    </p>
+    <p class="text-2xl font-bold text-success mt-2">
+      ${{ currentSession?.openingAmount | number:'1.0-0' }}
+    </p>
+    <p class="text-sm text-gray-600 mt-3">
+      Puedes comenzar a realizar ventas y operaciones.
+    </p>
+  </app-modal>
+
+  <app-modal
+    [isOpen]="showNoCashModal"
+    [title]="'Sin Sesión de Caja'"
+    [type]="'warning'"
+    [confirmText]="'Ir a Caja'"
+    [showCancelButton]="true"
+    [cancelText]="'Ahora no'"
+    (confirmed)="goToCash()"
+    (closed)="showNoCashModal = false"
+  >
+    <p class="text-gray-700">
+      No hay una sesión de caja abierta actualmente.
+    </p>
+    <p class="text-sm text-gray-600 mt-3">
+      Debes abrir una sesión de caja antes de poder realizar ventas y operaciones.
+    </p>
+  </app-modal>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-estanco"></div>
+  </div>
+
+  <!-- Grid de accesos rápidos -->
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Card POS -->
+    <div class="card cursor-pointer hover:scale-105 transition-transform" (click)="goToPOS()">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-estanco-dark">Punto de Venta</h3>
+          <p class="text-sm text-gray-600">Realizar ventas</p>
+        </div>
+        <svg class="w-12 h-12 text-estanco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      </div>
+      <button class="btn-primary w-full">
+        Ir al POS
+      </button>
+    </div>
+
+    <!-- Card Productos -->
+    <div class="card cursor-pointer hover:scale-105 transition-transform" (click)="goToProducts()">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-estanco-dark">Productos</h3>
+          <p class="text-sm text-gray-600">Gestionar inventario</p>
+        </div>
+        <svg class="w-12 h-12 text-estanco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+      </div>
+      <button class="btn-primary w-full">
+        Ver Productos
+      </button>
+    </div>
+
+    <!-- Card Caja -->
+    <div class="card cursor-pointer hover:scale-105 transition-transform" (click)="goToCash()">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-estanco-dark">Caja</h3>
+          <p class="text-sm text-gray-600">Control de efectivo</p>
+        </div>
+        <svg class="w-12 h-12 text-estanco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      </div>
+      <button class="btn-secondary w-full">
+        Gestionar Caja
+      </button>
+    </div>
+  </div>
+
+  <!-- Estadísticas del día -->
+  <h2 *ngIf="!loading" class="text-2xl font-bold text-estanco-dark mb-4">Estadísticas del Día</h2>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="stat-card-sales">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-white/80 text-sm font-medium">VENTAS DEL DÍA</span>
+        <svg class="w-8 h-8 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-white mb-1">${{ stats.totalSalesToday | number:'1.0-0' }}</h2>
+      <p class="text-white/80 text-sm">{{ stats.salesCountToday }} ventas realizadas</p>
+    </div>
+
+    <div class="stat-card-profit">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-white/80 text-sm font-medium">UTILIDAD</span>
+        <svg class="w-8 h-8 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-white mb-1">${{ stats.totalProfit | number:'1.0-0' }}</h2>
+      <p class="text-white/80 text-sm">{{ stats.totalProfit > 0 ? 'Ganancia estimada' : 'Sin datos' }}</p>
+    </div>
+
+    <div class="stat-card-stock">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-white/80 text-sm font-medium">PRODUCTOS</span>
+        <svg class="w-8 h-8 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-white mb-1">{{ stats.totalProducts }}</h2>
+      <p class="text-white/80 text-sm">{{ stats.lowStockProducts }} con stock bajo</p>
+    </div>
+
+    <div class="stat-card-expenses">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-white/80 text-sm font-medium">GASTOS</span>
+        <svg class="w-8 h-8 text-white/60" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11 4a1 1 0 10-2 0v4a1 1 0 102 0V7zm-3 1a1 1 0 10-2 0v3a1 1 0 102 0V8zM8 9a1 1 0 00-2 0v2a1 1 0 102 0V9z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold text-white mb-1">${{ stats.totalExpenses | number:'1.0-0' }}</h2>
+      <p class="text-white/80 text-sm">{{ stats.totalExpenses > 0 ? 'Gastos del día' : 'Sin gastos registrados' }}</p>
+    </div>
+  </div>
+</div>

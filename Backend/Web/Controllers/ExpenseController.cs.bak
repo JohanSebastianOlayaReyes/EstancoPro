@@ -1,0 +1,60 @@
+using Business.Interfaces;
+using Entity.Dto;
+using Entity.Model;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Presentation.Controllers
+{
+    /// <summary>
+    /// Controlador para Expense (Gastos Operativos)
+    /// </summary>
+    public class ExpenseController : BaseController<Expense, ExpenseDto>
+    {
+        public ExpenseController(IBaseBusiness<Expense, ExpenseDto> baseBusiness)
+            : base(baseBusiness)
+        {
+        }
+
+        /// <summary>
+        /// Obtiene gastos por categoría
+        /// GET: api/Expense/by-category?category=Servicios
+        /// </summary>
+        [HttpGet("by-category")]
+        public async Task<IActionResult> GetByCategory([FromQuery] string category)
+        {
+            try
+            {
+                var expenses = await _baseBusiness.GetAllAsync();
+                var filtered = expenses.Where(e => ((ExpenseDto)(object)e).Category == category);
+                return Ok(filtered);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener gastos", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene gastos en un rango de fechas
+        /// GET: api/Expense/by-date-range?from=2024-01-01&to=2024-12-31
+        /// </summary>
+        [HttpGet("by-date-range")]
+        public async Task<IActionResult> GetByDateRange([FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            try
+            {
+                var expenses = await _baseBusiness.GetAllAsync();
+                var filtered = expenses.Where(e =>
+                {
+                    var dto = (ExpenseDto)(object)e;
+                    return dto.ExpenseDate >= from && dto.ExpenseDate <= to;
+                });
+                return Ok(filtered);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener gastos", error = ex.Message });
+            }
+        }
+    }
+}

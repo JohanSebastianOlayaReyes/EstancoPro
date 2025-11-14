@@ -8,7 +8,10 @@ namespace Entity.Model
         public decimal TaxTotal { get; set; }
         public decimal GrandTotal { get; set; }
         public int CashSessionId { get; set; }
+        public int? CustomerId { get; set; }            // Cliente asociado (nullable para ventas sin cliente)
         public CashSession cashSession { get; set; }
+        public Customer customer { get; set; }
         public ICollection<SaleProductDetail> saleproductdetail { get; set; }
+        public ICollection<SalePayment> salePayments { get; set; }
     }
 }

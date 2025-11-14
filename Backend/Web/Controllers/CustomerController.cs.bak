@@ -1,0 +1,21 @@
+using Business.Interfaces;
+using Entity.Dto;
+using Entity.Model;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Presentation.Controllers
+{
+    /// <summary>
+    /// Controlador para Customer (Clientes)
+    /// </summary>
+    public class CustomerController : BaseController<Customer, CustomerDto>
+    {
+        public CustomerController(IBaseBusiness<Customer, CustomerDto> baseBusiness)
+            : base(baseBusiness)
+        {
+        }
+
+        // Los métodos CRUD básicos están en BaseController
+        // Aquí se pueden agregar endpoints específicos si se necesitan
+    }
+}

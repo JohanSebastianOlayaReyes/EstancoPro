@@ -153,11 +153,13 @@ builder.Services.AddScoped<IRolFormPermissionBusiness, RolFormPermissionBusiness
 builder.Services.AddScoped<ISupplierBusiness, SupplierBusiness>();
 builder.Services.AddScoped<ISaleBusiness, SaleBusiness>();
 builder.Services.AddScoped<IProductBusiness, ProductBusiness>();
+builder.Services.AddScoped<ICashSessionBusiness, CashSessionBusiness>();
 
 // Registro de dependencias para las capas de datos
 builder.Services.AddScoped<ISupplierData, SupplierData>();
 builder.Services.AddScoped<ISaleData, SaleData>();
 builder.Services.AddScoped<IProductData, ProductData>();
+builder.Services.AddScoped<ICashSessionData, CashSessionData>();
 
 // Registro de AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

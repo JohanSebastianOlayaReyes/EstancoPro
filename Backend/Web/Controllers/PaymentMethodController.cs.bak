@@ -1,0 +1,18 @@
+using Business.Interfaces;
+using Entity.Dto;
+using Entity.Model;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Presentation.Controllers
+{
+    /// <summary>
+    /// Controlador para PaymentMethod (Métodos de Pago)
+    /// </summary>
+    public class PaymentMethodController : BaseController<PaymentMethod, PaymentMethodDto>
+    {
+        public PaymentMethodController(IBaseBusiness<PaymentMethod, PaymentMethodDto> baseBusiness)
+            : base(baseBusiness)
+        {
+        }
+    }
+}

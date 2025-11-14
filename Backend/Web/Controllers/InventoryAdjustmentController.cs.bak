@@ -1,0 +1,37 @@
+using Business.Interfaces;
+using Entity.Dto;
+using Entity.Model;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Presentation.Controllers
+{
+    /// <summary>
+    /// Controlador para InventoryAdjustment (Ajustes de Inventario)
+    /// </summary>
+    public class InventoryAdjustmentController : BaseController<InventoryAdjustment, InventoryAdjustmentDto>
+    {
+        public InventoryAdjustmentController(IBaseBusiness<InventoryAdjustment, InventoryAdjustmentDto> baseBusiness)
+            : base(baseBusiness)
+        {
+        }
+
+        /// <summary>
+        /// Obtiene ajustes de un producto específico
+        /// GET: api/InventoryAdjustment/by-product/{productId}
+        /// </summary>
+        [HttpGet("by-product/{productId:int}")]
+        public async Task<IActionResult> GetByProduct(int productId)
+        {
+            try
+            {
+                var adjustments = await _baseBusiness.GetAllAsync();
+                var filtered = adjustments.Where(a => ((InventoryAdjustmentDto)(object)a).ProductId == productId);
+                return Ok(filtered);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener ajustes", error = ex.Message });
+            }
+        }
+    }
+}
