@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(ANALISIS_BACKEND.txt)",
+      "Bash(cat:*)",
+      "Bash(\"C:\\Users\\jsola\\Desktop\\ADSO\\EstancoPro\\Frontend\\src\\app\\core\\interceptors\\auth.interceptor.ts\")",
+      "Bash(npx @angular/cli@latest new:*)",
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,10 @@
+ANALISIS BACKEND ESTANCOPRO - RESUMEN EJECUTIVO
+
+Fecha: 13 de Noviembre 2025
+Tecnologia: .NET 9, C#, ASP.NET Core
+
+ROLES DEL SISTEMA:
+1. Administrador - admin@estancopro.com / Admin123!
+2. Cajero - cajero@estancopro.com / Cajero123!
+3. Vendedor - vendedor@estancopro.com / Vendedor123!
+4. Supervisor - supervisor@estancopro.com / Supervisor123!
